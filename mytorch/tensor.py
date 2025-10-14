@@ -204,3 +204,27 @@ class Tensor:
       out._prev.add(self)
       out._op = 'mean'
       return out
+  def softmax(self):
+      def internal_softmax(x):
+          exps = np.exp(x - np.max(x, axis=1, keepdims=True))
+          return exps / np.sum(exps, axis=1, keepdims=True)
+      x = internal_softmax(self.data)
+      out = Tensor(x)
+
+      def _backward():
+          if self.requires_grad:
+              if self.grad is None:
+               self.grad = np.zeros_like(self.data)
+              grad = out.grad  # upstream gradient
+              y = out.data  # softmax output
+              self.grad = (self.grad or np.zeros_like(self.data)) + \
+                          y * (grad - np.sum(grad * y, axis=-1, keepdims=True))
+
+      out._backward = _backward
+      out._prev.add(self)
+      out._op = 'softmax'
+      return out
+  def cross_entropy(self):
+      def internal_softmax(x):
+          exps = np.exp(x - np.max(x, axis=1, keepdims=True))
+          return exps / np.sum(exps, axis=1, keepdims=True)

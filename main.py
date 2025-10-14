@@ -1,7 +1,7 @@
 #file with example usage and test cases
 from mytorch.nn import Linear
 from mytorch.tensor import Tensor
-from mytorch.optim import SGD, Adam
+from mytorch.optim import SGD, Adam, AdamW
 from mytorch.nn import Module
 import numpy as np
 class TwoLayerNet(Module):
@@ -22,7 +22,7 @@ x = Tensor([[1, 2]], requires_grad=False)
 y = Tensor([[3]], requires_grad=False)
 
 linear = Linear(2, 1)
-opt = Adam(linear.parameters(), a=0.01)
+opt = AdamW(linear.parameters(), a=0.01)
 
 for _ in range(10):
     pred = linear(x)
@@ -34,7 +34,7 @@ for _ in range(10):
 print(pred)
 print("==============")
 x = Tensor([[1.0, 2.0], [3.0, 4.0]], requires_grad=False)  # 2 samples, 2 features
-y = Tensor([[3.0], [7.0]], requires_grad=False)            # targets
+y = Tensor([[5.0], [11.0]], requires_grad=False)            # targets
 net = TwoLayerNet(input_size=2, hidden_size=4, output_size=1)
 opt = SGD(net.parameters(), lr=0.01)
 print("starting loop")
