@@ -4,3 +4,4 @@ mytorch/__pycache__/
 *.pyd
 *.so
 mytorch/.idea/
+.idea/
