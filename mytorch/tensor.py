@@ -116,3 +116,30 @@ class Tensor:
     out._prev.add(self)
     out._op = 'tanh'
     return out
+  def sigmoid(self):
+      def internal_sigmoid(x):
+          return 1 / (1 + np.exp(-x))
+
+      x = internal_sigmoid(self.data)
+      out = Tensor(x)
+
+      def _backward():
+          if self.requires_grad:
+              s = internal_sigmoid(self.data)
+              self.grad = (self.grad or 0) + s*(1-s) * out.grad
+      out._backward = _backward
+      out._prev.add(self)
+      out._op = 'sigmoid'
+      return out
+  def relu(self):
+      x = np.maximum(0, self.data)
+      out = Tensor(x)
+
+      def _backward():
+          if self.requires_grad:
+              self.grad = self.grad if self.grad is not None else np.zeros_like(x)
+              self.grad += (x > 0).astype(x.dtype) * out.grad
+      out._backward = _backward
+      out._prev.add(self)
+      out._op = 'relu'
+      return out

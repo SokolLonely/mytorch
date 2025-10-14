@@ -1,6 +1,8 @@
+#file with example usage and test cases
 from mytorch.nn import Linear
 from mytorch.tensor import Tensor
 from mytorch.optim import SGD
+import numpy as np
 x = Tensor([[1, 2]], requires_grad=False)
 y = Tensor([[3]], requires_grad=False)
 
@@ -15,8 +17,6 @@ for _ in range(10):
     opt.zero_grad()
     print(loss.data)
 print(pred)
-# Paste your Tensor class definition here before running this test
-# (or assume it's already defined in the same file)
 
 # --- TEST 1: Simple addition ---
 # a = Tensor(2.0, requires_grad=True)
@@ -49,7 +49,7 @@ print(pred)
 # b = Tensor(-3.0, requires_grad=True)
 # c = Tensor(10.0, requires_grad=True)
 # e = (a * b)+c
-# d = e.tanh()
+# d = e.sigmoid()
 # # print("Forward result (a*b + c):", e.data)
 # d.backward()
 # print("Grad a:", a.grad)
@@ -66,3 +66,15 @@ print(pred)
 # c.backward()
 # print("Grad a:", a.grad)
 # print("Grad b:", b.grad)
+x = Tensor(np.array([-1.0, 0.0, 2.0]), requires_grad=True)
+y = x.relu()  # ReLU applied element-wise
+
+# Assume we start backward with gradient 1 for each element
+y.grad = np.ones_like(y.data)
+y._backward()  # call backward manually if needed
+
+print("Forward result y.data:", y.data)
+# Expected: [0.0, 0.0, 2.0]
+
+print("Grad x:", x.grad)
+# Expected derivative: [0, 0, 1] element-wise
