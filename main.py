@@ -2,12 +2,27 @@
 from mytorch.nn import Linear
 from mytorch.tensor import Tensor
 from mytorch.optim import SGD
+from mytorch.nn import Module
 import numpy as np
+class TwoLayerNet(Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super().__init__()
+        self.fc1 = Linear(input_size, hidden_size)
+        self.fc2 = Linear(hidden_size, output_size)
+
+    def parameters(self):
+        return self.fc1.parameters() + self.fc2.parameters()
+
+    def __call__(self, x):
+        # Simple network: Linear -> Tanh -> Linear
+        x = self.fc1(x).tanh()   # activation after first layer
+        x = self.fc2(x)          # output layer (no activation if regression)
+        return x
 x = Tensor([[1, 2]], requires_grad=False)
 y = Tensor([[3]], requires_grad=False)
 
 linear = Linear(2, 1)
-opt = SGD(linear.parameters(), lr=0.1)
+opt = SGD(linear.parameters(), lr=0.01)
 
 for _ in range(10):
     pred = linear(x)
@@ -17,7 +32,28 @@ for _ in range(10):
     opt.zero_grad()
     print(loss.data)
 print(pred)
+print("==============")
+x = Tensor([[1.0, 2.0], [3.0, 4.0]], requires_grad=False)  # 2 samples, 2 features
+y = Tensor([[3.0], [7.0]], requires_grad=False)            # targets
+net = TwoLayerNet(input_size=2, hidden_size=4, output_size=1)
+opt = SGD(net.parameters(), lr=0.01)
+print("starting loop")
+for epoch in range(500):
+    pred = net(x)
+    # Mean Squared Error
+    loss = ((pred - y) * (pred - y)).mean()
 
+    # backward pass
+    loss.backward()
+
+    # update parameters
+    opt.step()
+    opt.zero_grad()
+
+    print(f"Epoch {epoch + 1}: loss = {loss.data.item()}")
+
+print("Final predictions:")
+print(pred.data)
 # --- TEST 1: Simple addition ---
 # a = Tensor(2.0, requires_grad=True)
 # b = Tensor(3.0, requires_grad=True)
@@ -66,15 +102,15 @@ print(pred)
 # c.backward()
 # print("Grad a:", a.grad)
 # print("Grad b:", b.grad)
-x = Tensor(np.array([-1.0, 0.0, 2.0]), requires_grad=True)
-y = x.leaky_relu()  # ReLU applied element-wise
-
-# Assume we start backward with gradient 1 for each element
-y.grad = np.ones_like(y.data)
-y._backward()  # call backward manually if needed
-
-print("Forward result y.data:", y.data)
-# Expected: [0.0, 0.0, 2.0]
-
-print("Grad x:", x.grad)
+# x = Tensor(np.array([-1.0, 0.0, 2.0]), requires_grad=True)
+# y = x.leaky_relu()  # ReLU applied element-wise
+#
+# # Assume we start backward with gradient 1 for each element
+# y.grad = np.ones_like(y.data)
+# y._backward()  # call backward manually if needed
+#
+# print("Forward result y.data:", y.data)
+# # Expected: [0.0, 0.0, 2.0]
+#
+# print("Grad x:", x.grad)
 # Expected derivative: [0, 0, 1] element-wise
