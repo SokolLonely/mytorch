@@ -1,7 +1,7 @@
 #file with example usage and test cases
 from mytorch.nn import Linear
 from mytorch.tensor import Tensor
-from mytorch.optim import SGD
+from mytorch.optim import SGD, Adam
 from mytorch.nn import Module
 import numpy as np
 class TwoLayerNet(Module):
@@ -22,7 +22,7 @@ x = Tensor([[1, 2]], requires_grad=False)
 y = Tensor([[3]], requires_grad=False)
 
 linear = Linear(2, 1)
-opt = SGD(linear.parameters(), lr=0.01)
+opt = Adam(linear.parameters(), a=0.01)
 
 for _ in range(10):
     pred = linear(x)
