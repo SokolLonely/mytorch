@@ -1,0 +1,6 @@
+mytorch/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+mytorch/.idea/
