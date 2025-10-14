@@ -143,3 +143,17 @@ class Tensor:
       out._prev.add(self)
       out._op = 'relu'
       return out
+  def leaky_relu(self, negative_slope=0.01,):
+      x = np.maximum(self.data*negative_slope, self.data)
+      out = Tensor(x)
+
+      def _backward():
+          if self.requires_grad:
+              self.grad = self.grad if self.grad is not None else np.zeros_like(x)
+              grad_input = np.where(self.data > 0, 1.0, negative_slope)  # element-wise derivative
+              self.grad += grad_input * out.grad
+
+      out._backward = _backward
+      out._prev.add(self)
+      out._op = 'leaky_relu'
+      return out

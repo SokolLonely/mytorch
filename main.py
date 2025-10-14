@@ -67,7 +67,7 @@ print(pred)
 # print("Grad a:", a.grad)
 # print("Grad b:", b.grad)
 x = Tensor(np.array([-1.0, 0.0, 2.0]), requires_grad=True)
-y = x.relu()  # ReLU applied element-wise
+y = x.leaky_relu()  # ReLU applied element-wise
 
 # Assume we start backward with gradient 1 for each element
 y.grad = np.ones_like(y.data)
