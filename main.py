@@ -3,7 +3,7 @@ from mytorch.nn import Linear
 from mytorch.tensor import Tensor
 from mytorch.optim import SGD, Adam, AdamW
 from mytorch.nn import Module
-from mytorch.nn.functional import cross_entropy, MSELoss
+from mytorch.nn.functional import cross_entropy, MSELoss, l1_loss
 import numpy as np
 class TwoLayerNet(Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -40,10 +40,10 @@ y = Tensor([[0], [1], [1.2]], requires_grad=False)            #currently, should
 net = TwoLayerNet(input_size=2, hidden_size=4, output_size=1)
 opt = SGD(net.parameters(), lr=0.01)
 print("starting loop")
-for epoch in range(500):
+for epoch in range(1500):
     pred = net(x)
     # Mean Squared Error
-    loss = MSELoss(pred, y)
+    loss = l1_loss(pred, y)
 
     # backward pass
     loss.backward()
