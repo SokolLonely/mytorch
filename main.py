@@ -3,7 +3,7 @@ from mytorch.nn import Linear
 from mytorch.tensor import Tensor
 from mytorch.optim import SGD, Adam, AdamW
 from mytorch.nn import Module
-from mytorch.nn.functional import cross_entropy
+from mytorch.nn.functional import cross_entropy, MSELoss
 import numpy as np
 class TwoLayerNet(Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -35,15 +35,15 @@ class TwoLayerNet(Module):
 #     print(loss.data)
 # print(pred)
 # print("==============")
-x = Tensor([[1.0, 2.0], [4.0, 4.0]], requires_grad=False)  # 2 samples, 2 features
-y = Tensor([0, 1], requires_grad=False)            # targets
-net = TwoLayerNet(input_size=2, hidden_size=4, output_size=2)
+x = Tensor([[1.0, 2.0], [4.0, 4.0], [4, 5]], requires_grad=False)  # 2 samples, 2 features
+y = Tensor([[0], [1], [1.2]], requires_grad=False)            #currently, should be 2d for mse and 1d for cross entropy
+net = TwoLayerNet(input_size=2, hidden_size=4, output_size=1)
 opt = SGD(net.parameters(), lr=0.01)
 print("starting loop")
 for epoch in range(500):
     pred = net(x)
     # Mean Squared Error
-    loss = cross_entropy(pred, y)
+    loss = MSELoss(pred, y)
 
     # backward pass
     loss.backward()
@@ -52,7 +52,7 @@ for epoch in range(500):
     opt.step()
     opt.zero_grad()
 
-    print(f"Epoch {epoch + 1}: loss = {loss.data.item()}")
+    print(f"Epoch {epoch + 1}: loss = {loss.data}")
 
 print("Final predictions:")
 print(pred.data)
