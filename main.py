@@ -3,6 +3,7 @@ from mytorch.nn import Linear
 from mytorch.tensor import Tensor
 from mytorch.optim import SGD, Adam, AdamW
 from mytorch.nn import Module
+from mytorch.nn.functional import cross_entropy
 import numpy as np
 class TwoLayerNet(Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -18,30 +19,31 @@ class TwoLayerNet(Module):
         x = self.fc1(x).tanh()   # activation after first layer
         x = self.fc2(x)          # output layer (no activation if regression)
         return x
-x = Tensor([[1, 2]], requires_grad=False)
-y = Tensor([[3]], requires_grad=False)
-
-linear = Linear(2, 1)
-opt = AdamW(linear.parameters(), a=0.01)
-
-for _ in range(10):
-    pred = linear(x)
-    loss = (pred - y) * (pred - y)
-    loss.backward()
-    opt.step()
-    opt.zero_grad()
-    print(loss.data)
-print(pred)
-print("==============")
-x = Tensor([[1.0, 2.0], [3.0, 4.0]], requires_grad=False)  # 2 samples, 2 features
-y = Tensor([[5.0], [11.0]], requires_grad=False)            # targets
-net = TwoLayerNet(input_size=2, hidden_size=4, output_size=1)
+#
+# x = Tensor([[1, 2]], requires_grad=False)
+# y = Tensor([[3]], requires_grad=False)
+#
+# linear = Linear(2, 1)
+# opt = Adam(linear.parameters(), a=0.01)
+#
+# for _ in range(1000):
+#     pred = linear(x)
+#     loss = (pred - y) * (pred - y)
+#     loss.backward()
+#     opt.step()
+#     opt.zero_grad()
+#     print(loss.data)
+# print(pred)
+# print("==============")
+x = Tensor([[1.0, 2.0], [4.0, 4.0]], requires_grad=False)  # 2 samples, 2 features
+y = Tensor([0, 1], requires_grad=False)            # targets
+net = TwoLayerNet(input_size=2, hidden_size=4, output_size=2)
 opt = SGD(net.parameters(), lr=0.01)
 print("starting loop")
 for epoch in range(500):
     pred = net(x)
     # Mean Squared Error
-    loss = ((pred - y) * (pred - y)).mean()
+    loss = cross_entropy(pred, y)
 
     # backward pass
     loss.backward()
