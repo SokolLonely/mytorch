@@ -108,6 +108,19 @@ class Tensor:
         out._op = '*'
         #assert self.data.size == self.grad.size
         return out
+
+  def __pow__(self, power):
+      out = Tensor(self.data ** power, )
+      def _backward():
+          if self.requires_grad:
+              if self.grad is None or isinstance(self.grad, (float, int)):
+                  self.grad = np.zeros_like(self.data)
+              self.grad += out.grad*power*(self.data ** (power - 1))
+      out._backward = _backward
+      out.requires_grad=self.requires_grad
+      out._prev.add(self)
+      out._op = '**'
+      return out
   def __matmul__(self, other):
         if not isinstance(other, Tensor):
             other = Tensor(other)
