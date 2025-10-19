@@ -1,5 +1,5 @@
 #file with example usage and test cases
-from mytorch.nn import Linear
+from mytorch.nn import Linear, Flatten
 from mytorch.tensor import Tensor
 from mytorch.optim import SGD, Adam, AdamW
 from mytorch.nn import Module
@@ -8,6 +8,7 @@ import numpy as np
 class TwoLayerNet(Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
+        self.fl = Flatten()
         self.fc1 = Linear(input_size, hidden_size)
         self.fc2 = Linear(hidden_size, output_size)
 
@@ -16,6 +17,7 @@ class TwoLayerNet(Module):
 
     def __call__(self, x):
         # Simple network: Linear -> Tanh -> Linear
+        x = self.fl(x)
         x = self.fc1(x).tanh()   # activation after first layer
         x = self.fc2(x)          # output layer (no activation if regression)
         return x
@@ -35,9 +37,9 @@ class TwoLayerNet(Module):
 #     print(loss.data)
 # print(pred)
 # print("==============")
-x = Tensor([[1.0, 2.0], [4.0, 4.0], [4, 5]], requires_grad=False)  # 2 samples, 2 features
+x = Tensor([[[1.0, 2.0], [1.0, 2.0]], [[4.0, 4.0], [4.0, 4.0]], [[4, 5], [4, 5]]], requires_grad=False)  # 2 samples, 2 features
 y = Tensor([[0], [1], [1.2]], requires_grad=False)            #currently, should be 2d for mse and 1d for cross entropy
-net = TwoLayerNet(input_size=2, hidden_size=4, output_size=1)
+net = TwoLayerNet(input_size=4, hidden_size=4, output_size=1)
 opt = SGD(net.parameters(), lr=0.01)
 print("starting loop")
 for epoch in range(1500):
