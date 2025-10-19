@@ -4,7 +4,13 @@ from mytorch.tensor import Tensor
 from mytorch.optim import SGD, Adam, AdamW
 from mytorch.nn import Module
 from mytorch.nn.functional import cross_entropy, MSELoss, l1_loss
+from tensorflow import keras
 import numpy as np
+(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+assert x_train.shape == (60000, 28, 28)
+assert x_test.shape == (10000, 28, 28)
+assert y_train.shape == (60000,)
+assert y_test.shape == (10000,)
 class TwoLayerNet(Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
@@ -18,9 +24,15 @@ class TwoLayerNet(Module):
     def __call__(self, x):
         # Simple network: Linear -> Tanh -> Linear
         x = self.fl(x)
-        x = self.fc1(x).tanh()   # activation after first layer
-        x = self.fc2(x)          # output layer (no activation if regression)
+        x = self.fc1(x).sigmoid()   # activation after first layer
+        x = self.fc2(x).sigmoid()
         return x
+    def evaluate(self, x, y):
+        preds = self(x).data
+        pred_labels = np.argmax(preds, axis=1)
+        temp = pred_labels == y.data
+        accuracy = np.mean(temp)
+        return accuracy
 #
 # x = Tensor([[1, 2]], requires_grad=False)
 # y = Tensor([[3]], requires_grad=False)
@@ -37,27 +49,35 @@ class TwoLayerNet(Module):
 #     print(loss.data)
 # print(pred)
 # print("==============")
-x = Tensor([[[1.0, 2.0], [1.0, 2.0]], [[4.0, 4.0], [4.0, 4.0]], [[4, 5], [4, 5]]], requires_grad=False)  # 2 samples, 2 features
-y = Tensor([[0], [1], [1.2]], requires_grad=False)            #currently, should be 2d for mse and 1d for cross entropy
-net = TwoLayerNet(input_size=4, hidden_size=4, output_size=1)
-opt = SGD(net.parameters(), lr=0.01)
-print("starting loop")
-for epoch in range(1500):
-    pred = net(x)
-    # Mean Squared Error
-    loss = l1_loss(pred, y)
+# x = Tensor([[[1.0, 2.0], [1.0, 2.0]], [[4.0, 4.0], [4.0, 4.0]], [[4, 5], [4, 5]]], requires_grad=False)  # 2 samples, 2 features
+# y = Tensor([[0], [1], [1.2]], requires_grad=False)            #currently, should be 2d for mse and 1d for cross entropy
+preds = np.array([[0.1, 0.9, 0.0],
+                  [0.8, 0.1, 0.1],
+                  [0.2, 0.2, 0.6]])
+y = np.array([1, 0, 2])
+accuracy = np.mean(np.argmax(preds, axis=1) == y)
 
+print(accuracy)  # 1.0  (all correct)
+x_train = Tensor(x_train)
+y_train = Tensor(y_train)
+x_test = Tensor(x_test)
+y_test = Tensor(y_test)
+net = TwoLayerNet(input_size=784, hidden_size=400, output_size=10)
+opt = Adam(net.parameters(), a=0.01)
+print("starting loop")
+for epoch in range(20):
+    pred = net(x_train)
+    loss = cross_entropy(pred, y_train)
     # backward pass
     loss.backward()
-
     # update parameters
     opt.step()
     opt.zero_grad()
 
-    print(f"Epoch {epoch + 1}: loss = {loss.data}")
+    print(f"Epoch {epoch + 1}: loss = {loss.data}, acc = {net.evaluate(x_test, y_test)}")
 
-print("Final predictions:")
-print(pred.data)
+print("Metrics:")
+net.evaluate(x_test, y_test)
 # --- TEST 1: Simple addition ---
 # a = Tensor(2.0, requires_grad=True)
 # b = Tensor(3.0, requires_grad=True)
